@@ -28,7 +28,7 @@ NUMERO : DIGITO+ ;
 // OTRO : . ;
 
 //INT : 'int' ;
-//DOUBLE: 'double';
+
 TIPO: ('int' | 'double');
 
 ID : (LETRA | '_')(LETRA | DIGITO | '_')* ;
@@ -47,7 +47,7 @@ WS : [ \t\n\r] -> skip ;
 
 // s : PA s PC s
 //   |
-//   ;
+//   ; 
 
 programa : instrucciones EOF ;
 
