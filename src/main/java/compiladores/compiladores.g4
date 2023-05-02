@@ -28,7 +28,7 @@ NUMERO : DIGITO+ ;
 // OTRO : . ;
 
 //INT : 'int' ;
-
+//test
 TIPO: ('int' | 'double');
 
 ID : (LETRA | '_')(LETRA | DIGITO | '_')* ;
