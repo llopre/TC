@@ -18,11 +18,16 @@ LLC : '}' ;
 ASIGN : '=' ;
 COMA : ',' ;
 EQ : '==' ;
+SUMA : '+';
+RESTA : '-';
+MULT : '*';
+DIV: '/';
+MOD : '%';
 OPECOMP : ('<' | '>' | '<=' | '>=' | '==' | '!=');
-OPEARIT : ('+' | '-' | '*' | '/' | '%');
 OPELOGI: ('&&' | '||'); 
 
 WHILE: 'while';
+IF: 'if';
 
 NUMERO : DIGITO+ ;
 // OTRO : . ;
@@ -52,18 +57,19 @@ WS : [ \t\n\r] -> skip ;
 programa : instrucciones EOF ;
 
 instrucciones : instruccion instrucciones
-              | estructura instrucciones
               |
               ;
 
 instruccion : asignacion
             | declaracion
+            | estructura
             ;
 
-asignacion : ID ASIGN (INT | FLOAT | ID) PYC;
+asignacion : ID ASIGN expresion PYC;
            
 
 declaracion : TIPO ID inicializacion listaid PYC ;
+
 
 inicializacion : ASIGN (INT | FLOAT | ID)
                |
@@ -80,7 +86,31 @@ listaExprLog: OPELOGI exprLog
             | 
             ;
 
-estructura : iwhile;
+estructura : (iwhile | iif);
 
+bloque : LLA instrucciones LLC;
 
-iwhile : WHILE PA exprLog PC LLA instrucciones LLC;
+iwhile : WHILE PA exprLog PC bloque;
+
+iif : IF PA exprLog PC bloque;
+
+expresion : termino exp ;
+
+exp : SUMA  termino exp
+    | RESTA termino exp
+    |
+    ;
+
+termino : factor term ;
+
+term : MULT factor term
+     | DIV  factor term
+     | MOD  factor term
+     |
+     ;
+
+factor : INT
+       | FLOAT
+       | ID
+       | PA expresion PC 
+       ;
