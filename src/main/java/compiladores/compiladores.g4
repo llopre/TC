@@ -1,11 +1,11 @@
 grammar compiladores;
 
-// @header {
-// package compiladores;
-// }
+ @header {
+ package compiladores;
+ }
 
-INT : [0-9]+;
-FLOAT : [0-9]*'.'[0-9]*; 
+NUMERO : DIGITO+;
+// OTRO : . ;
 
 fragment LETRA : [A-Za-z] ;
 fragment DIGITO : [0-9] ;
@@ -17,24 +17,40 @@ LLA : '{' ;
 LLC : '}' ;
 ASIGN : '=' ;
 COMA : ',' ;
-EQ : '==' ;
+//EQ : '==' ;
 SUMA : '+';
 RESTA : '-';
 MULT : '*';
 DIV: '/';
 MOD : '%';
 OPECOMP : ('<' | '>' | '<=' | '>=' | '==' | '!=');
+
+//Comparación
+MENOR: '<';
+MAYOR: '>';
+MENORIGUAL: '<=';
+MAYORIGUAL: '>=';
+IGUAL: '==';
+DISTINTO: '!=';
+
+//Operadores logicos
+AND: '&&';
+OR: '||';
 OPELOGI: ('&&' | '||'); 
 
+//Ciclos
 WHILE: 'while';
+FOR: 'for';
+
+//Condicion
 IF: 'if';
 
-NUMERO : DIGITO+ ;
-// OTRO : . ;
+//Tipos de datos
+INT: 'int';
+DOUBLE: 'double';
 
-//INT : 'int' ;
-//test
-TIPO: ('int' | 'double');
+TIPO: INT
+    | DOUBLE;
 
 ID : (LETRA | '_')(LETRA | DIGITO | '_')* ;
 
@@ -63,6 +79,7 @@ instrucciones : instruccion instrucciones
 instruccion : asignacion
             | declaracion
             | estructura
+            | funcionDeclara
             ;
 
 asignacion : ID ASIGN expresion PYC;
@@ -71,7 +88,7 @@ asignacion : ID ASIGN expresion PYC;
 declaracion : TIPO ID inicializacion listaid PYC ;
 
 
-inicializacion : ASIGN (INT | FLOAT | ID)
+inicializacion : ASIGN constante 
                |
                ;
 
@@ -79,14 +96,18 @@ listaid : COMA ID inicializacion listaid
         |
         ;
 
-exprLog : (ID | FLOAT | INT) OPECOMP (ID | FLOAT | INT) listaExprLog;
+constante : NUMERO
+          | ID;
+
+exprLog :  constante OPECOMP constante listaExprLog;
         
 
 listaExprLog: OPELOGI exprLog
             | 
             ;
 
-estructura : (iwhile | iif);
+estructura : iwhile 
+           | iif;
 
 bloque : LLA instrucciones LLC;
 
@@ -109,8 +130,13 @@ term : MULT factor term
      |
      ;
 
-factor : INT
-       | FLOAT
+factor : NUMERO
        | ID
        | PA expresion PC 
        ;
+
+listaParam : TIPO ID
+           | 
+           ;
+
+funcionDeclara : TIPO ID PA listaParam PC PYC;
