@@ -48,9 +48,11 @@ IF: 'if';
 //Tipos de datos
 INT: 'int';
 DOUBLE: 'double';
+TIPOFUNC : 'void'; 
 
-TIPO: INT
-    | DOUBLE;
+ tipo : INT
+      | DOUBLE;
+
 
 ID : (LETRA | '_')(LETRA | DIGITO | '_')* ;
 
@@ -80,12 +82,15 @@ instruccion : asignacion
             | declaracion
             | estructura
             | funcionDeclara
+            | funcionDefini
+            | bloque
             ;
 
 asignacion : ID ASIGN expresion PYC;
            
 
-declaracion : TIPO ID inicializacion listaid PYC ;
+declaracion : tipo ID inicializacion listaid PYC; 
+             
 
 
 inicializacion : ASIGN constante 
@@ -102,19 +107,22 @@ constante : NUMERO
 exprLog :  constante OPECOMP constante listaExprLog;
         
 
-listaExprLog: OPELOGI exprLog
+listaExprLog: (AND | OR) exprLog
             | 
             ;
 
 estructura : iwhile 
-           | iif;
+           | iif
+           ;
 
-bloque : LLA instrucciones LLC;
 
 iwhile : WHILE PA exprLog PC bloque;
 
 iif : IF PA exprLog PC bloque;
 
+bloque : LLA instrucciones LLC;
+
+// terminos con op aritmeticas
 expresion : termino exp ;
 
 exp : SUMA  termino exp
@@ -135,8 +143,19 @@ factor : NUMERO
        | PA expresion PC 
        ;
 
-listaParam : TIPO ID
+//terminos con op logicas
+// agrego aritmeticologicas
+
+opLogica: disyuncion; //Porque separa terminos
+
+disyuncion: ;
+
+
+listaParam : tipo ID
+           | tipo ID COMA listaParam
            | 
            ;
 
-funcionDeclara : TIPO ID PA listaParam PC PYC;
+funcionDeclara : (tipo | TIPOFUNC) ID PA listaParam PC PYC;
+
+funcionDefini : (tipo | TIPOFUNC) ID PA listaParam PC bloque;
