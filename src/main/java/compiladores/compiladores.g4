@@ -53,14 +53,17 @@ FOR: 'for';
 
 //Condicion
 IF: 'if';
+ELSE: 'else';
 
 //Tipos de datos
 INT: 'int';
 DOUBLE: 'double';
+FLOAT: 'float';
 TIPOFUNC : 'void'; 
 
 tipo : INT
-      | DOUBLE;
+     | DOUBLE
+     | FLOAT;
 
 RETORNO: 'return';
 
@@ -120,7 +123,11 @@ ifor: FOR PA (asignacion | declaracion) PYC opLogica PYC opLogica PC bloque;
  
 iwhile : WHILE PA opLogica PC bloque;
 
-iif : IF PA opLogica PC bloque;
+iif : IF PA opLogica PC bloque ielse;
+
+ielse: ELSE bloque
+     |
+     ;
 
 bloque : LLA instrucciones LLC;
 
@@ -159,7 +166,7 @@ sufijo : INC
 
 
 //terminos con op logicas -------
-// agrego aritmeticologicas -----
+// integro las aritmeticologicas -----
 
 opLogica: disyuncion; //Porque separa terminos
 
