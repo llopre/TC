@@ -23,6 +23,9 @@ RESTA : '-';
 MULT : '*';
 DIV: '/';
 MOD : '%';
+INC: '++';
+DEC: '--';
+NOT: '!';
 
 //Comparación
 MENOR: '<';
@@ -56,15 +59,20 @@ INT: 'int';
 DOUBLE: 'double';
 TIPOFUNC : 'void'; 
 
- tipo : INT
+tipo : INT
       | DOUBLE;
+
+RETORNO: 'return';
+
 
 
 ID : (LETRA | '_')(LETRA | DIGITO | '_')* ;
 
 WS : [ \t\n\r] -> skip ;
 
-//////
+
+//////------ Reglas ---
+
 
 programa : instrucciones EOF ;
 
@@ -72,18 +80,20 @@ instrucciones : instruccion instrucciones
               |
               ;
 
-instruccion : asignacion
-            | declaracion
+instruccion : asignacion PYC //lo pongo aca porque sino quedaba deformado el FOR
+            | declaracion PYC
+            | expresion PYC //para los casos q++ sueltos o en FOR
             | estructura
             | funcionDeclara
             | funcionDefini
             | bloque
+            | retorno PYC
             ;
 
-asignacion : ID ASIGN expresion PYC;
+asignacion : ID ASIGN expresion;
            
 
-declaracion : tipo ID inicializacion listaid PYC; 
+declaracion : tipo ID inicializacion listaid; 
 
 inicializacion : ASIGN constante 
                |
@@ -96,24 +106,26 @@ listaid : COMA ID inicializacion listaid
 constante : NUMERO
           | ID;
 
-//exprLog :  constante OPECOMP constante listaExprLog;
+retorno :  RETORNO opLogica;
 
-//listaExprLog: (AND | OR) exprLog
-//            | 
-//            ;
 
+// Estructuras y ciclos -------
 estructura : iwhile 
            | iif
+           | ifor
            ;
 
+ifor: FOR PA (asignacion | declaracion) PYC opLogica PYC opLogica PC bloque;
 
+ 
 iwhile : WHILE PA opLogica PC bloque;
 
 iif : IF PA opLogica PC bloque;
 
 bloque : LLA instrucciones LLC;
 
-// terminos con op aritmeticas
+
+// terminos con op aritmeticas ------
 expresion : termino exp ;
 
 exp : SUMA  termino exp
@@ -130,16 +142,30 @@ term : MULT factor term
      ;
 
 factor : NUMERO
-       | ID
+       | prefijo ID sufijo
        | PA expresion PC 
        ;
 
-//terminos con op logicas
-// agrego aritmeticologicas
+prefijo : INC
+        | DEC
+        | NOT
+        |
+        ;
+
+sufijo : INC
+       | DEC
+       |
+       ;
+
+
+//terminos con op logicas -------
+// agrego aritmeticologicas -----
 
 opLogica: disyuncion; //Porque separa terminos
 
 //Separa el OR
+//Siempre va primero a buscar una proposicion y/o el and, 
+//cuando vuelve pasa por el posible or.
 disyuncion: conjuncion 
           | disyuncion OR conjuncion
           ;
@@ -156,6 +182,14 @@ listaParam : tipo ID
            | 
            ;
 
+//exprLog :  constante OPECOMP constante listaExprLog;
+
+//listaExprLog: (AND | OR) exprLog
+//            | 
+//            ;
+
+
+// Funciones ------
 funcionDeclara : (tipo | TIPOFUNC) ID PA listaParam PC PYC;
 
 funcionDefini : (tipo | TIPOFUNC) ID PA listaParam PC bloque;
