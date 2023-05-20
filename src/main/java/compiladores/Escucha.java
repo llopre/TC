@@ -18,7 +18,7 @@ public class Escucha extends compiladoresBaseListener{
         System.out.println("Comienza parsing");
         super.enterPrograma(ctx);
     }
-
+    
     @Override
     public void exitPrograma(ProgramaContext ctx) {
         super.exitPrograma(ctx);
