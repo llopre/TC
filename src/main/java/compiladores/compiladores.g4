@@ -23,7 +23,6 @@ RESTA : '-';
 MULT : '*';
 DIV: '/';
 MOD : '%';
-OPECOMP : ('<' | '>' | '<=' | '>=' | '==' | '!=');
 
 //Comparación
 MENOR: '<';
@@ -33,10 +32,17 @@ MAYORIGUAL: '>=';
 IGUAL: '==';
 DISTINTO: '!=';
 
+comparacion : MENOR
+            | MAYOR
+            | MENORIGUAL
+            | MAYORIGUAL
+            | IGUAL
+            | DISTINTO
+            ;
+
 //Operadores logicos
 AND: '&&';
 OR: '||';
-OPELOGI: ('&&' | '||'); 
 
 //Ciclos
 WHILE: 'while';
@@ -58,19 +64,7 @@ ID : (LETRA | '_')(LETRA | DIGITO | '_')* ;
 
 WS : [ \t\n\r] -> skip ;
 
-// s : ID     { System.out.println("ID ->" + $ID.getText() + "<--"); }         s
-//   | NUMERO { System.out.println("NUMERO ->" + $NUMERO.getText() + "<--"); } s
-//   | OTRO   { System.out.println("Otro ->" + $OTRO.getText() + "<--"); }     s
-//   | EOF
-//   ;
-
-// si : s
-//    | EOF
-//    ;
-
-// s : PA s PC s
-//   |
-//   ; 
+//////
 
 programa : instrucciones EOF ;
 
@@ -90,8 +84,6 @@ asignacion : ID ASIGN expresion PYC;
            
 
 declaracion : tipo ID inicializacion listaid PYC; 
-             
-
 
 inicializacion : ASIGN constante 
                |
@@ -104,21 +96,20 @@ listaid : COMA ID inicializacion listaid
 constante : NUMERO
           | ID;
 
-exprLog :  constante OPECOMP constante listaExprLog;
-        
+//exprLog :  constante OPECOMP constante listaExprLog;
 
-listaExprLog: (AND | OR) exprLog
-            | 
-            ;
+//listaExprLog: (AND | OR) exprLog
+//            | 
+//            ;
 
 estructura : iwhile 
            | iif
            ;
 
 
-iwhile : WHILE PA exprLog PC bloque;
+iwhile : WHILE PA opLogica PC bloque;
 
-iif : IF PA exprLog PC bloque;
+iif : IF PA opLogica PC bloque;
 
 bloque : LLA instrucciones LLC;
 
@@ -148,7 +139,16 @@ factor : NUMERO
 
 opLogica: disyuncion; //Porque separa terminos
 
-disyuncion: ;
+//Separa el OR
+disyuncion: conjuncion 
+          | disyuncion OR conjuncion
+          ;
+
+conjuncion: proposicion
+          | conjuncion AND proposicion;
+
+proposicion : expresion
+            | proposicion comparacion expresion;
 
 
 listaParam : tipo ID
@@ -159,3 +159,11 @@ listaParam : tipo ID
 funcionDeclara : (tipo | TIPOFUNC) ID PA listaParam PC PYC;
 
 funcionDefini : (tipo | TIPOFUNC) ID PA listaParam PC bloque;
+
+
+/////
+// s : ID     { System.out.println("ID ->" + $ID.getText() + "<--"); }         s
+//   | NUMERO { System.out.println("NUMERO ->" + $NUMERO.getText() + "<--"); } s
+//   | OTRO   { System.out.println("Otro ->" + $OTRO.getText() + "<--"); }     s
+//   | EOF
+//   ;
