@@ -83,8 +83,8 @@ instrucciones : instruccion instrucciones
               |
               ;
 
-instruccion : asignacion PYC //lo pongo aca porque sino quedaba deformado el FOR
-            | declaracion PYC
+instruccion : declaracion PYC 
+            | asignacion PYC //lo pongo aca porque sino quedaba deformado el FOR
             | expresion PYC //para los casos q++ sueltos o en FOR
             | estructura
             | funcionDeclara
@@ -93,18 +93,23 @@ instruccion : asignacion PYC //lo pongo aca porque sino quedaba deformado el FOR
             | retorno PYC
             ;
 
-asignacion : ID ASIGN expresion;
+declaracion : tipo listaDeclaracion;
            
 
-declaracion : tipo ID inicializacion listaid; 
+listaDeclaracion : ID
+                 | asignacion
+                 | asignacion COMA listaDeclaracion
+                 | ID COMA listaDeclaracion
+                 ;
 
-inicializacion : ASIGN constante 
-               |
-               ;
+asignacion : ID ASIGN expresion;
+// inicializacion : ASIGN constante 
+//                |
+//                ;
 
-listaid : COMA ID inicializacion listaid
-        |
-        ;
+// listaid : COMA ID inicializacion listaid
+//         |
+//         ;
 
 constante : NUMERO
           | ID;
@@ -151,6 +156,7 @@ term : MULT factor term
 factor : NUMERO
        | prefijo ID sufijo
        | PA expresion PC 
+       | funcion
        ;
 
 prefijo : INC
@@ -197,11 +203,16 @@ listaParam : tipo ID
 
 
 // Funciones ------
+funcion : ID PA parametros PC;
+
 funcionDeclara : (tipo | TIPOFUNC) ID PA listaParam PC PYC;
 
 funcionDefini : (tipo | TIPOFUNC) ID PA listaParam PC bloque;
 
-
+parametros : expresion
+           | expresion COMA parametros
+           | 
+           ;
 /////
 // s : ID     { System.out.println("ID ->" + $ID.getText() + "<--"); }         s
 //   | NUMERO { System.out.println("NUMERO ->" + $NUMERO.getText() + "<--"); } s
