@@ -57,6 +57,15 @@ public class TablaSimbolos {
         return null;
     }
 
+    public Id buscarVariable(final String nombre) {
+        for(int i = 0; i < this.tablaSimbolos.size(); i++) {
+            if(this.tablaSimbolos.get(i).containsKey(nombre))
+                return this.tablaSimbolos.get(i).get(nombre);
+        }
+
+        return null;
+    }
+
     public boolean variableDeclarada(Id id) {
         for(int i = this.tablaSimbolos.size() - 1; i >= 0; i--) {
             if (this.tablaSimbolos.get(i).containsKey(id.getNombre())) {
@@ -64,6 +73,47 @@ public class TablaSimbolos {
             }
         }
         return false;
+    }
+
+    public boolean variableDeclarada(final String nombre) {
+        for(int i = this.tablaSimbolos.size() - 1; i >= 0; i--) {
+            if (this.tablaSimbolos.get(i).containsKey(nombre)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public void setIdUsado(final String nombre) {
+        for (HashMap<String, Id> contexto : this.tablaSimbolos) {
+            for (Id id : contexto.values()) {
+                if (id.getNombre().equals(nombre))
+                    id.setUsado(true);
+            }
+        }
+    }
+
+    public void addContextoParam() {
+        this.tablaSimbolos.add(new HashMap<String, Id>());
+    }
+
+
+    public void addParamFuncion(final Id id) {
+        // luego de agregar el contexto
+        this.tablaSimbolos.getLast().put(id.getNombre(), id);
+    }
+
+    public void addFuncion(final Funcion funcion) {
+        this.tablaSimbolos.getLast().put(funcion.getNombre(), funcion);
+        if (this.tablaSimbolos.size() == 0){
+            if (this.tablaSimbolosFinal.size() > 1){
+                this.tablaSimbolosFinal.get(this.tablaSimbolosFinal.size() - 2).put(funcion.getNombre(), funcion);
+            }
+            else {
+                this.tablaSimbolosFinal.get(this.tablaSimbolosFinal.size() - 1).put(funcion.getNombre(), funcion);
+            }
+        }
     }
 
     public void print(){

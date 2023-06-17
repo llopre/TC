@@ -1,11 +1,14 @@
 package compiladores;
 
+import java.util.LinkedList;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import compiladores.compiladoresParser.AsignacionContext;
 import compiladores.compiladoresParser.DeclaracionContext;
+import compiladores.compiladoresParser.FuncionDeclaraContext;
 import compiladores.compiladoresParser.InstruccionContext;
 import compiladores.compiladoresParser.ListaDeclaracionContext;
 import compiladores.compiladoresParser.ProgramaContext;
@@ -40,13 +43,10 @@ public class Escucha extends compiladoresBaseListener{
         ListaDeclaracionContext lista = ctx.listaDeclaracion();
         
         while(lista != null){
-            System.out.println("ENTRO AL WHILE");
            if(lista.asignacion() == null){
-            System.out.println("ENTRO AL IF");
                 Id id = new Variable(lista.ID().getText(), ctx.tipo().getText());
                 if(!this.tablaSimbolos.variableDeclarada(id)){
                     this.tablaSimbolos.addId(id);
-                    System.out.println("ENTRO EN ADD");
                 }
                 else{
                     //la variable ya existia
@@ -68,13 +68,73 @@ public class Escucha extends compiladoresBaseListener{
 
     @Override
     public void exitAsignacion(AsignacionContext ctx) {
-        // TODO Auto-generated method stub
+        
+        Id variable = this.tablaSimbolos.buscarVariable(ctx.ID().getText());
+
+        if (ctx.getParent().getClass().equals(ListaDeclaracionContext.class)) {
+            ListaDeclaracionContext lista = (ListaDeclaracionContext) ctx.getParent();
+            
+            while(lista.getParent().getClass().equals(ListaDeclaracionContext.class)) {
+                lista = (ListaDeclaracionContext) lista.getParent();
+            }
+
+            if (lista.getParent().getClass().equals(DeclaracionContext.class)) {
+                String nombreVariable = ctx.ID().getText();
+                String tipoVariable = ((DeclaracionContext) lista.getParent()).tipo().getText();
+                variable = new Variable(nombreVariable, tipoVariable);
+
+                if (!this.tablaSimbolos.variableDeclarada(variable)) {
+                    this.tablaSimbolos.addId(variable);
+                }
+                else {
+                    //parser de error -> variable duplicada
+                    //this.errorReporter.printError(linea, "duplicated variable "+ variable.getNombre());
+                    System.out.println("Variable duplicada linea: " + ctx.getStop().getLine());
+                }
+            }
+        }
+        else {
+            //parser de error -> variable no declarada
+            //this.errorReporter.printError(ctx.getStop().getLine(), "duplicated "+ ctx.ID().getText() +" is not declared");
+            System.out.println("Variable no declarada linea: " + ctx.getStop().getLine());
+        }
+        if (this.tablaSimbolos.variableDeclarada(ctx.ID().getText())) {
+            this.tablaSimbolos.setIdUsado(ctx.ID().getText());
+        }
+
         super.exitAsignacion(ctx);
-        System.out.println("\t --> Fin Asignacion: |" + ctx.getText() 
-                        + "| - Hijos:" + ctx.getChildCount());
+        
     }
 
+    @Override
+    public void exitFuncionDeclara(FuncionDeclaraContext ctx) {
+        
+        Funcion funcion = null;
+
+        funcion = new Funcion(ctx.tipo().getText(), ctx.ID().getText());
     
+        LinkedList<Id> paramFuncion = new LinkedList<Id>();
+
+        if(!ctx.listaParam().isEmpty()) {
+            this.tablaSimbolos.addContextoParam(); //para verificar variables
+            paramFuncion = helper.getParametros(ctx.listaParam(), paramFuncion);
+            
+            for (Id id : paramFuncion) {
+                if (id.getNombre() != "") {
+                    if (this.tablaSimbolos.variableDeclarada(id)) {
+                        //error: variable ya declarada
+                        System.out.println("Variable duplicada linea: " + ctx.getStop().getLine());
+                    }
+                    this.tablaSimbolos.addParamFuncion(id);
+                }
+            }
+            this.tablaSimbolos.eliminarContexto();
+        }
+        funcion.setParametros(paramFuncion);
+        this.tablaSimbolos.addFuncion(funcion);
+
+        super.exitFuncionDeclara(ctx);
+    }
 
     @Override
     public void enterInstruccion(InstruccionContext ctx) {
