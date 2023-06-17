@@ -42,6 +42,10 @@ public class TablaSimbolos {
         this.tablaSimbolos.removeLast();
     }
 
+    public int getContextos() {
+        return this.tablaSimbolos.size();
+    }
+
     //Agregar id 
     public void addId(final Id id) {
         this.tablaSimbolos.getLast().put(id.getNombre(), id);
@@ -116,11 +120,32 @@ public class TablaSimbolos {
         }
     }
 
+    public Funcion getFuncion(final Funcion function) {
+        Id id = this.tablaSimbolos.getFirst().get(function.getNombre());
+        
+        if (id instanceof Funcion)
+            return (Funcion) id;
+        else
+            return null; 
+    }
+
     public void print(){
 
         int ctx = 1;
         
+        /* 
         for (HashMap<String, Id> contexto : this.tablaSimbolos) {
+            System.out.println("-> Contexto " + ctx++);
+            for (Id id : contexto.values()) {
+                System.out.println("    " + id.toString());
+            }
+            System.out.println("----\n");
+        }
+        */
+
+        ctx = 1;
+        System.out.println("\nTabla de simbolos final: \n");
+        for (HashMap<String, Id> contexto : this.tablaSimbolosFinal) {
             System.out.println("-> Contexto " + ctx++);
             for (Id id : contexto.values()) {
                 System.out.println("    " + id.toString());

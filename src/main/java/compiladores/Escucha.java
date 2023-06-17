@@ -2,13 +2,16 @@ package compiladores;
 
 import java.util.LinkedList;
 
-import org.antlr.v4.runtime.ParserRuleContext;
+
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import compiladores.compiladoresParser.AsignacionContext;
+import compiladores.compiladoresParser.BloqueContext;
 import compiladores.compiladoresParser.DeclaracionContext;
+import compiladores.compiladoresParser.FuncionContext;
 import compiladores.compiladoresParser.FuncionDeclaraContext;
+import compiladores.compiladoresParser.FuncionDefiniContext;
 import compiladores.compiladoresParser.InstruccionContext;
 import compiladores.compiladoresParser.ListaDeclaracionContext;
 import compiladores.compiladoresParser.ProgramaContext;
@@ -24,7 +27,6 @@ public class Escucha extends compiladoresBaseListener{
     @Override
     public void enterPrograma(ProgramaContext ctx) {
         System.out.println("\n---  Comienza parsing ---");
-        System.out.println("---  Tabla de símbolos ---");
         super.enterPrograma(ctx);
     }
 
@@ -36,12 +38,27 @@ public class Escucha extends compiladoresBaseListener{
         this.tablaSimbolos.print();
     }
 
-
     
+    @Override
+    public void enterInstruccion(InstruccionContext ctx) {
+        nodos++;
+
+        super.enterInstruccion(ctx);
+       
+    }
+    
+    @Override
+    public void exitInstruccion(InstruccionContext ctx) {
+
+        super.exitInstruccion(ctx);
+
+    }
+
     @Override
     public void exitDeclaracion(DeclaracionContext ctx) {
         ListaDeclaracionContext lista = ctx.listaDeclaracion();
         
+
         while(lista != null){
            if(lista.asignacion() == null){
                 Id id = new Variable(lista.ID().getText(), ctx.tipo().getText());
@@ -56,13 +73,14 @@ public class Escucha extends compiladoresBaseListener{
            lista = lista.listaDeclaracion();
         }
         super.exitDeclaracion(ctx);
+        
     }
     
 
     @Override
     public void enterAsignacion(AsignacionContext ctx) {
-        System.out.println("\tNueva Asignacion: |" + ctx.getText() 
-                        + "| - Hijos:" + ctx.getChildCount());
+        //System.out.println("\tNueva Asignacion: |" + ctx.getText() 
+        //                + "| - Hijos:" + ctx.getChildCount());
         super.enterAsignacion(ctx);
     }
 
@@ -136,11 +154,55 @@ public class Escucha extends compiladoresBaseListener{
         super.exitFuncionDeclara(ctx);
     }
 
+    
+
     @Override
-    public void enterInstruccion(InstruccionContext ctx) {
+    public void enterBloque(BloqueContext ctx) {
+        
         nodos++;
-        super.enterInstruccion(ctx);
+        //pregunto si estoy definiendo una funcion
+        if (ctx.getParent().getClass().equals(FuncionDefiniContext.class)) {
+            FuncionDefiniContext fnctx = (FuncionDefiniContext) ctx.getParent();
+            Funcion funcion = helper.infoFuncion(fnctx);
+
+            if (!this.tablaSimbolos.variableDeclarada(funcion))
+                this.tablaSimbolos.addFuncion(funcion);
+                this.tablaSimbolos.addContexto();
+                
+
+            //Agrego los parametros al contexto
+            if (fnctx.listaParam().getChildCount() != 0) {
+                for (Id param : funcion.getParametros()) {
+                    this.tablaSimbolos.addId(param);
+                }
+            }
+            
+        }
+        else {
+            this.tablaSimbolos.addContexto();
+        }
     }
+
+
+    @Override
+    public void exitBloque(BloqueContext ctx) {
+        this.tablaSimbolos.eliminarContexto();
+    }
+
+    @Override
+    public void exitFuncion(FuncionContext ctx) {
+        String nombre = ctx.ID().getText();
+
+        Id funcion = this.tablaSimbolos.buscarVariable(nombre);
+
+        if (funcion == null){
+            System.out.println("La función "+ nombre + "no está declarada." + ctx.getStop().getLine());
+            return;
+        }
+        funcion.setUsado(true);
+    }
+
+    
 
     @Override
     public void visitErrorNode(ErrorNode node) {

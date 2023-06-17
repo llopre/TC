@@ -1,2 +1,9 @@
-probando 123 probando
-3 palabras
+int miFuncion2(int x);
+
+int main(){
+
+    int x, i = 3;
+    int u = miFuncion2(i);
+
+    
+}
