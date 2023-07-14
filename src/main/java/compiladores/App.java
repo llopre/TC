@@ -35,7 +35,9 @@ public class App {
         // Conectamos el visitor
            Caminante visitor = new Caminante();
            visitor.visit(tree);
-        // System.out.println(visitor);
+           visitor.getCodigo();
+            //System.out.println(visitor);
+
         // System.out.println(visitor.getErrorNodes());
         // Imprime el arbol obtenido
         //System.out.println(tree.toStringTree(parser));
