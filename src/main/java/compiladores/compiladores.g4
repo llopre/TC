@@ -65,6 +65,8 @@ tipo : INT
      | DOUBLE
      | FLOAT;
 
+pyc : PYC;
+
 RETORNO: 'return';
 
 
@@ -83,7 +85,7 @@ instrucciones : instruccion instrucciones
               |
               ;
 
-instruccion : declaracion PYC 
+instruccion : declaracion  
             | asignacion PYC //lo pongo aca porque sino quedaba deformado el FOR
             | expresion PYC //para los casos q++ sueltos o en FOR
             | estructura
@@ -93,7 +95,7 @@ instruccion : declaracion PYC
             | retorno PYC
             ;
 
-declaracion : tipo listaDeclaracion;
+declaracion : tipo listaDeclaracion pyc;
            
 
 listaDeclaracion : ID
@@ -102,7 +104,7 @@ listaDeclaracion : ID
                  | ID COMA listaDeclaracion
                  ;
 
-asignacion : ID ASIGN expresion;
+asignacion : ID ASIGN opLogica;
 // inicializacion : ASIGN constante 
 //                |
 //                ;
@@ -155,7 +157,7 @@ term : MULT factor term
 
 factor : NUMERO
        | prefijo ID sufijo
-       | PA expresion PC 
+       | PA opLogica PC 
        | funcion
        ;
 
@@ -209,8 +211,8 @@ funcionDeclara : (tipo | TIPOFUNC) ID PA listaParam PC PYC;
 
 funcionDefini : (tipo | TIPOFUNC) ID PA listaParam PC bloque;
 
-parametros : expresion
-           | expresion COMA parametros
+parametros : opLogica
+           | opLogica COMA parametros
            | 
            ;
 /////

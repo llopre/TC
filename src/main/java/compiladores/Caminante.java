@@ -10,6 +10,9 @@ import org.antlr.v4.runtime.tree.Trees;
 import compiladores.compiladoresParser.AsignacionContext;
 import compiladores.compiladoresParser.DeclaracionContext;
 import compiladores.compiladoresParser.ExpresionContext;
+import compiladores.compiladoresParser.FuncionContext;
+import compiladores.compiladoresParser.FuncionDeclaraContext;
+import compiladores.compiladoresParser.FuncionDefiniContext;
 import compiladores.compiladoresParser.OpLogicaContext;
 
 public class Caminante extends compiladoresBaseVisitor<String>{
@@ -168,7 +171,7 @@ public class Caminante extends compiladoresBaseVisitor<String>{
                     visitFuncion(((compiladoresParser.TerminoContext) terms.get(i)).factor().funcion());
                     this.bandFunc = false;
                     this.previo = temp;
-                    this.actual = "t" + (this.contador - 1);
+                    this.actual = "x" + (this.contador - 1);
                 } else {
                     this.actual = factors.get(0).getText();
                 }
@@ -250,7 +253,7 @@ public class Caminante extends compiladoresBaseVisitor<String>{
         else {
             OpLogicaContext ctx_expresion = ctx.opLogica();
             procesaOpLogica(ctx_expresion);
-            this.codigo = this.codigo.replace("t" + (this.contador - 1), ctx.ID().getText());
+            this.codigo = this.codigo.replace("x" + (this.contador - 1), ctx.ID().getText());
             this.contador--;
         }
         return null;
@@ -267,7 +270,7 @@ public class Caminante extends compiladoresBaseVisitor<String>{
                 } else{
                     compiladoresParser.OpLogicaContext operaciones_ctx = lista.asignacion().opLogica();
                     procesaOperacion(operaciones_ctx);
-                    this.codigo = this.codigo.replace("t" + (this.contador - 1), lista.asignacion().ID().getText());
+                    this.codigo = this.codigo.replace("x" + (this.contador - 1), lista.asignacion().ID().getText());
                     this.contador--;
                 }
             }
@@ -276,12 +279,64 @@ public class Caminante extends compiladoresBaseVisitor<String>{
         return null;
     }
 
+    @Override
+    public String visitFuncionDefini(FuncionDefiniContext ctx) {
+
+        this.codigo += ctx.ID().getText() + ":\n";
+        this.codigo += "ComienzaFuncion\n";
+        String parametro;
+        List<ParseTree> params = getnodos(ctx, compiladoresParser.RULE_listaParam);
+        for (int i = 0; i < params.size(); i++) {
+            compiladoresParser.ListaParamContext actual = (compiladoresParser.ListaParamContext)params.get(i);
+            if (actual.ID() != null) {
+                parametro = actual.ID().getText();
+                this.codigo += "PopParametro " + parametro + "\n"; //se saca el param de la pila
+            }
+        }
+        visitChildren(ctx.bloque());
+        this.codigo += "FinFuncion\n";
+        return null;
+    }
+
+    @Override
+    public String visitFuncionDeclara(FuncionDeclaraContext ctx) {
+        
+        return null;
+    }
+
+    @Override
+    public String visitFuncion(FuncionContext ctx) {
+        LinkedList<String> params = new LinkedList<String>();
+        if (ctx.parametros() != null) {
+            LinkedList<ParseTree> operaciones = new LinkedList<ParseTree>();
+            getNodosPorRegla(ctx.parametros(), compiladoresParser.RULE_parametros, operaciones);
+            for (ParseTree operacion : operaciones) {
+                compiladoresParser.ParametrosContext param = (compiladoresParser.ParametrosContext) operacion;
+                procesaOperacion(((compiladoresParser.OpLogicaContext) param.opLogica()));
+                params.add("pushParametro " + this.actual);
+            }
+        }
+        for (String param : params) {
+            this.codigo += param + "\n";
+        }
+        if (this.bandFunc) {
+            this.codigo += "x" + this.contador + " = CALL " + ctx.ID() + "\n";
+            this.contador++;
+        } else{
+            this.codigo += "CALL " + ctx.ID() + "\n";
+        }
+        return null;
+    }
+
+
+
+    
 
     public void getCodigo() {
         System.out.println("\n----- Código de tres direcciones ----- ");
         System.out.println(this.codigo);
-       
     }
+    
 
    
     
