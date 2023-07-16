@@ -54,6 +54,7 @@ FOR: 'for';
 //Condicion
 IF: 'if';
 ELSE: 'else';
+ELSEIF: 'elseif';
 
 //Tipos de datos
 INT: 'int';
@@ -133,6 +134,7 @@ iwhile : WHILE PA opLogica PC bloque;
 iif : IF PA opLogica PC bloque ielse;
 
 ielse: ELSE bloque
+     | ELSEIF PA opLogica PC bloque ielse 
      |
      ;
 
