@@ -33,9 +33,11 @@ public class App {
         // parser.programa();
          ParseTree tree =  parser.programa();
         // Conectamos el visitor
+        if(!ManejaErrores.getInstancia().getHayError()){
            Caminante visitor = new Caminante();
            visitor.visit(tree);
            visitor.getCodigo();
+        }
             //System.out.println(visitor);
 
         // System.out.println(visitor.getErrorNodes());

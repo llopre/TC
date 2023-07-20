@@ -461,7 +461,7 @@ public class Caminante extends compiladoresBaseVisitor<String>{
 
     //Impresion del codigo para app
     public void getCodigo() {
-        System.out.println("\n----- Código de tres direcciones ----- ");
+        System.out.println("\n----- Código de tres direcciones ----- \n");
         System.out.println(this.codigo);
     }
 

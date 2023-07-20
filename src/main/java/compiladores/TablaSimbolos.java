@@ -144,7 +144,7 @@ public class TablaSimbolos {
         */
 
         ctx = 1;
-        System.out.println("\nTabla de simbolos final: \n");
+        System.out.println("\n-- Tabla de simbolos final: \n");
         for (HashMap<String, Id> contexto : this.tablaSimbolosFinal) {
             System.out.println("-> Contexto " + ctx++);
             for (Id id : contexto.values()) {

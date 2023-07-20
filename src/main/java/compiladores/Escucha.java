@@ -24,17 +24,23 @@ public class Escucha extends compiladoresBaseListener{
 
     private TablaSimbolos tablaSimbolos = TablaSimbolos.getInstancia();
 
+    private ManejaErrores err = ManejaErrores.getInstancia();
+
     @Override
     public void enterPrograma(ProgramaContext ctx) {
-        System.out.println("\n---  Comienza parsing ---");
+        System.out.println("\n-----  Comienza parsing -----\n");
         super.enterPrograma(ctx);
     }
 
     @Override
     public void exitPrograma(ProgramaContext ctx) {
         super.exitPrograma(ctx);
-        System.out.println("\nFin de compilación --- Nodos: " + nodos + ". Tokens: " 
+        System.out.println("\n-- Fin de compilación --- Nodos: " + nodos + ". Tokens: " 
                            + tokens + ". Errores:" + errores + "\n");
+        if(errores > 0){
+            ManejaErrores.getInstancia().setHayError();
+            System.out.println("\n---- El programa contiene errores. ----\n");
+        }                  
         this.tablaSimbolos.print();
     }
 
@@ -67,7 +73,7 @@ public class Escucha extends compiladoresBaseListener{
                 }
                 else{
                     //la variable ya existia
-                    System.out.println("Variable duplicada linea: " + ctx.getStop().getLine());
+                    this.err.imprimeError(ctx.getStop().getLine(), " variable duplicada: " + id);
                 }
            }
            lista = lista.listaDeclaracion();
@@ -105,16 +111,12 @@ public class Escucha extends compiladoresBaseListener{
                     this.tablaSimbolos.addId(variable);
                 }
                 else {
-                    //parser de error -> variable duplicada
-                    //this.errorReporter.printError(linea, "duplicated variable "+ variable.getNombre());
-                    System.out.println("Variable duplicada linea: " + ctx.getStop().getLine());
+                    this.err.imprimeError(ctx.getStop().getLine(), " variable duplicada: " + nombreVariable);
                 }
             }
         }
         else {
-            //parser de error -> variable no declarada
-            //this.errorReporter.printError(ctx.getStop().getLine(), "duplicated "+ ctx.ID().getText() +" is not declared");
-            System.out.println("Variable no declarada linea: " + ctx.getStop().getLine());
+            this.err.imprimeError(ctx.getStop().getLine(), " variable no declarada: " + ctx.ID().getText());
         }
         if (this.tablaSimbolos.variableDeclarada(ctx.ID().getText())) {
             this.tablaSimbolos.setIdUsado(ctx.ID().getText());
@@ -140,8 +142,7 @@ public class Escucha extends compiladoresBaseListener{
             for (Id id : paramFuncion) {
                 if (id.getNombre() != "") {
                     if (this.tablaSimbolos.variableDeclarada(id)) {
-                        //error: variable ya declarada
-                        System.out.println("Variable duplicada linea: " + ctx.getStop().getLine());
+                        this.err.imprimeError(ctx.getStop().getLine(), " variable duplicada: " + id);
                     }
                     this.tablaSimbolos.addParamFuncion(id);
                 }
@@ -196,7 +197,7 @@ public class Escucha extends compiladoresBaseListener{
         Id funcion = this.tablaSimbolos.buscarVariable(nombre);
 
         if (funcion == null){
-            System.out.println("La función "+ nombre + "no está declarada." + ctx.getStop().getLine());
+            this.err.imprimeError(ctx.getStop().getLine(), " función no declarada: " + nombre);
             return;
         }
         funcion.setUsado(true);
